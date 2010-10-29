@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+<category>UNC</category>
+<title>ARCTIC</title>
+<description>ARCTIC (Automatic Regional Cortical ThICkness) is an end-to-end application allowing an individual regional cortical thickness analysis. If a parcellation map is provided, a lobar analysis is computed. Cortical thickness information are stored in '.csv' files and several images corresponding to the different steps of the pipeline can be saved or displayed within Slicer3. Two methods exist to perform the cortical thickness analysis: 1)The inputs are raw images (T1,T2,PD-weighted images) and a tissue segmentation atlas. 2)The input is a tissue-segmentation label image.</description>
+<version>1.0</version>
+<documentation-url></documentation-url>
+<license></license>
+<contributor>Cedric Mathieu - Clement Vachet - Martin Styner (NIRAL - UNC)</contributor>
+<acknowledgements></acknowledgements>
+
+<parameters>
+	<label>Input 1 : Raw Images</label>
+	<description>Input parameters</description>
+	<image>
+		<name>T1</name>
+		<default></default>
+		<label>T1-Weighted Image</label>
+		<longflag>T1</longflag>
+		<channel>input</channel>
+		<description>T1-weighted image</description>
+	</image>
+	<image>
+		<name>T2</name>
+		<default></default>
+		<label>T2-Weighted Image</label>
+		<longflag>T2</longflag>
+		<channel>input</channel>
+		<description>T2-weighted image</description>
+	</image>
+	<image>
+		<name>pd</name>
+		<default></default>
+		<label>PD-Weighted Image</label>
+		<longflag>pd</longflag>
+		<channel>input</channel>
+		<description>PD-weighted image</description>
+	</image>
+	<directory>
+		<name>segAtlasDir</name>
+		<default></default>
+		<label>Tissue Segmentation Atlas Directory</label>
+		<longflag>segAtlasDir</longflag>
+		<channel>input</channel>
+		<description>Tissue segmentation atlas directory</description>
+	</directory>
+	<string-enumeration>
+		<name>atlasType</name>
+		<label>Segmentation Atlas Type</label>
+		<longflag>atlasType</longflag>
+		<description>Segmentation atlas type</description>
+		<element>T1</element>
+		<element>T2</element>
+		<default>T1</default>
+	</string-enumeration>
+</parameters>	
+<parameters advanced="true">
+	<label>Input 2 : Segmented Image</label>
+	<description>Input parameters</description>
+	<image>
+		<name>label</name>
+		<default></default>
+		<label>Tissue Segmentation Image</label>
+		<longflag>label</longflag>
+		<channel>input</channel>
+		<description>Tissue segmentation image</description>
+	</image>
+	<integer>
+		<name>WMLabel</name>
+		<description>White matter label</description>
+		<label>White Matter Label</label>
+		<longflag>WMLabel</longflag>
+		<default>1</default>
+	</integer>
+	<integer>
+		<name>GMLabel</name>
+		<description>Grey matter label</description>
+		<label>Grey Matter Label</label>
+		<longflag>GMLabel</longflag>
+		<default>2</default>
+	</integer>
+
+	<integer>
+		<name>CSFLabel</name>
+		<description>CSF label</description>
+		<label>CSF Label</label>
+		<longflag>CSFLabel</longflag>
+		<default>3</default>
+	</integer>
+	<image>
+		<name>rawImage</name>
+		<default></default>
+		<label>Raw Image</label>
+		<longflag>rawImage</longflag>
+		<channel>input</channel>
+		<description>Raw image used for lobbar parcellation analysis (not necessary if you give the "Case Parcellation Image")</description>
+	</image>
+</parameters>
+<parameters>
+	<label>Output</label>
+	<description>Output parameters</description>
+	<image>
+		<name>WMCortThick</name>
+		<label>Cortical Thickness on WM Boundary</label>
+		<description>Cortical thickness on white matter boundary</description>
+		<longflag>--SaveWM</longflag>
+		<channel>output</channel>
+	</image>
+	<image>
+		<name>GMCortThick</name>
+		<label>Cortical Thickness on GM Boundary</label>
+		<description>Cortical thickness on grey matter boundary</description>
+		<longflag>--SaveGM</longflag>
+		<channel>output</channel>
+	</image>
+	<directory>
+		<name>outputRepCortThick</name>
+		<default></default>
+		<label>Cortical Thickness Results Directory</label>
+		<longflag>outputDir</longflag>
+		<channel>output</channel>
+		<description>Directory in which a ARCTIC folder will be created</description>
+	</directory>
+	<string>
+		<name>prefix</name>
+		<default></default>
+		<label>ID Number</label>
+		<longflag>IDNumber</longflag>
+		<channel>input</channel>
+		<description>The ID Number is the prefix which will be add before the output files</description>
+	</string>
+</parameters>
+<parameters>
+	<label>Parcellation</label>
+	<description>If specified, a lobar cortical thickness analysis will be computed</description>
+	<image>
+		<name>caseParcellation</name>
+		<default></default>
+		<label>Case Parcellation Image</label>
+		<longflag>caseParcellation</longflag>
+		<channel>input</channel>
+		<description>If the parcellation image is in the input coordinate space</description>
+	</image>
+	<image>
+		<name>parcellation</name>
+		<default></default>
+		<label>Atlas Parcellation Image</label>
+		<longflag>atlasParcellation</longflag>
+		<channel>input</channel>
+		<description>If the parcellation image is in the atlas coordinate space</description>
+	</image>
+	<image>
+		<name>atlas</name>
+		<default></default>
+		<label>Atlas Image</label>
+		<longflag>atlas</longflag>
+		<channel>input</channel>
+		<description>Atlas image (if you choose the atlas parcellation)</description>
+	</image>
+</parameters>
+<parameters advanced="true">
+	<label>Advanced tissue segmentation parameters</label>
+	<description>Advanced parameters for the tissue segmentation step</description>
+	<integer>
+		<name>filterIteration</name>
+		<description>Filter iterations</description>
+		<label>Filter Iterations</label>
+		<longflag>filterIteration</longflag>
+		<default>10</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>50</maximum>
+			<step>1</step>
+		</constraints>
+	</integer>
+	<float>
+		<name>filterTimeStep</name>
+		<description>Filter time step</description>
+		<label>Filter Time Step</label>
+		<longflag>filterTimeStep</longflag>
+		<default>0.01</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>0.5</maximum>			
+			<step>0.01</step>
+		</constraints>
+	</float>
+	<string-enumeration>
+		<name>filterMethod</name>
+		<label>Filter Method</label>
+		<longflag>filterMethod</longflag>
+		<description>Filter method</description>
+		<element>Curvature flow</element>
+		<element>Grad aniso diffusion</element>
+		<default>Curvature flow</default>
+	</string-enumeration>
+	<float>
+		<name>WMPrior</name>
+		<description>White matter global spacial prior scaling</description>
+		<label>WM global spacial prior scaling</label>
+		<longflag>WMPrior</longflag>
+		<default>1.2</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>2</maximum>
+			<step>0.1</step>
+		</constraints>
+	</float>
+	<float>
+		<name>GMPrior</name>
+		<description>Grey matter global spacial prior scaling</description>
+		<label>GM global spacial prior scaling</label>
+		<longflag>GMPrior</longflag>
+		<default>1</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>2</maximum>
+			<step>0.1</step>
+		</constraints>
+	</float>
+	<float>
+		<name>CSFPrior</name>
+		<description>Cerebrospinal fluid global spacial prior scaling</description>
+		<label>CSF global spacial prior scaling</label>
+		<longflag>CSFPrior</longflag>
+		<default>0.7</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>2</maximum>
+			<step>0.1</step>
+		</constraints>
+	</float>
+	<float>
+		<name>OtherPrior</name>
+		<description>Other global spacial prior scaling</description>
+		<label>Other global spacial prior scaling</label>
+		<longflag>OtherPrior</longflag>
+		<default>1</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>2</maximum>
+			<step>0.01</step>
+		</constraints>
+	</float>
+	<integer>
+		<name>maxBiasDegree</name>
+		<description>Maximum bias degree</description>
+		<label>Maximum Bias Degree</label>
+		<longflag>maxBiasDegree</longflag>
+		<default>4</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>20</maximum>
+			<step>1</step>
+		</constraints>
+	</integer>
+	<boolean>
+		<name>segmentationMaskingOff</name>
+		<default>false</default>
+		<label>No tissue segmentation masking</label>
+		<longflag>segmentationMaskingOff</longflag>
+		<description>Do not mask the tissue segmentation with the registered parcellation</description>
+	</boolean>
+	<boolean>
+		<name>atlasWarpingOff</name>
+		<default>false</default>
+		<label>No atlas warping</label>
+		<longflag>atlasWarpingOff</longflag>
+		<description>Deformable registration of atlas to subject</description>
+	</boolean>
+	<integer>
+		<name>gridSizeX</name>
+		<description>X-direction grid size for atlas warping</description>
+		<label>Grid Size (X)</label>
+		<longflag>gridSizeX</longflag>
+		<default>5</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>20</maximum>
+			<step>1</step>
+		</constraints>
+	</integer>
+	<integer>
+		<name>gridSizeY</name>
+		<description>Y-direction grid size for atlas warping</description>
+		<label>Grid Size (Y)</label>
+		<longflag>gridSizeY</longflag>
+		<default>5</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>20</maximum>
+			<step>1</step>
+		</constraints>
+	</integer>
+	<integer>
+		<name>gridSizeZ</name>
+		<description>Z-direction grid size for atlas warping</description>
+		<label>Grid Size (Z)</label>
+		<longflag>gridSizeZ</longflag>
+		<default>5</default>
+		<constraints>
+			<minimum>0</minimum>
+			<maximum>20</maximum>
+			<step>1</step>
+		</constraints>
+	</integer>
+</parameters>
+<parameters advanced="true">
+	<label>Advanced skull stripping parameters</label>
+	<description>Advanced parameters for the skull stripping step</description>
+	<boolean>
+		<name>dilateOn</name>
+		<default>false</default>
+		<label>Mask Dilation</label>
+		<longflag>dilate</longflag>
+		<description>Mask dilation (low tissue segmentation quality)</description>
+	</boolean>
+</parameters>
+<parameters advanced="true">
+	<label>Advanced cortical thickness parameters</label>
+	<description>Advanced parameters for the cortical thickness step</description>
+	<boolean>
+		<name>InterpOff</name>
+		<label>InterpOff</label>
+		<description>To not interpolate cortical thickness</description>
+		<longflag>InterpOff</longflag>
+		<default>false</default>
+	</boolean>
+	<float>
+		<name>Threshold</name>
+		<label>Threshold</label>
+		<description>Set the threshold used to match the cortical thickness map with the parcellation</description>
+		<default>1.8</default>
+		<longflag>threshold</longflag>
+	</float> 
+</parameters>
+<parameters advanced="true">
+	<label>Advanced atlas registration parameters</label>
+	<description>Advanced parameters for the atlas registration step</description>
+	<string-enumeration>
+		<name>initialization</name>
+		<description>Method to prime the registration process</description>
+		<label>Initialization</label>
+		<longflag>initialization</longflag>
+		<element>None</element>
+		<element>Landmarks</element>
+		<element>ImageCenters</element>
+		<element>CentersOfMass</element>
+		<element>SecondMoments</element>
+		<default>CentersOfMass</default>
+	</string-enumeration>
+</parameters>
+<!--<parameters advanced="true">
+	<label>Advanced orientaion parameters</label>
+	<description>Advanced parameters for the orientation of the inputs</description>
+	<string>
+		<name>orientation</name>
+		<default></default>
+		<label>T1,T2,PD-weighted images orientation</label>
+		<longflag>orientation</longflag>
+		<channel>input</channel>
+		<description>Orientation of the selected images</description>
+	</string>
+	<string>
+		<name>segAtlasOrientation</name>
+		<default></default>
+		<label>Segmentation atlas orientation</label>
+		<longflag>segAtlasOrientation</longflag>
+		<channel>input</channel>
+		<description>Orientation of the selected tissue segmentation atlas</description>
+	</string>
+	<string>
+		<name>rawImageOrientation</name>
+		<default></default>
+		<label>Raw image orientation</label>
+		<longflag>rawImageOrientation</longflag>
+		<channel>input</channel>
+		<description>Orientation of the selected images</description>
+	</string>
+	<string>
+		<name>atlasOrientation</name>
+		<default></default>
+		<label>Atlas/Parcellation orientation</label>
+		<longflag>atlasOrientation</longflag>
+		<channel>input</channel>
+		<description>Orientation of the selected atlas</description>
+	</string>
+</parameters>
+-->
+
+
+</executable>

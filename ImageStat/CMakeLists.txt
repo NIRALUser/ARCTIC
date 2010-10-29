@@ -1,0 +1,17 @@
+PROJECT(ImageStat)
+
+#NeuroLib_USE_ITK()
+
+#FIND_PACKAGE(ITK REQUIRED)
+
+#IF (ITK_FOUND)
+#   INCLUDE(${USE_ITK_FILE})
+#ELSE(ITK_FOUND)
+#   MESSAGE(FATAL_ERROR, "ITK not found. Please set ITK_DIR.")
+#ENDIF (ITK_FOUND)
+
+  ADD_EXECUTABLE( ImageStat ImageStat.cc)
+  TARGET_LINK_LIBRARIES( ImageStat ${ITK_LIBRARIES} )
+
+  slicer3_set_plugins_output_path(ImageStat)
+  slicer3_install_plugins(ImageStat)

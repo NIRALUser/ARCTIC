@@ -1,0 +1,15 @@
+PROJECT(ImageMath)
+
+#FIND_PACKAGE(ITK REQUIRED)
+
+#IF (ITK_FOUND)
+#   INCLUDE(${USE_ITK_FILE})
+#ELSE(ITK_FOUND)
+#   MESSAGE(FATAL_ERROR, "ITK not found. Please set ITK_DIR.")
+#ENDIF (ITK_FOUND)
+
+  ADD_EXECUTABLE( ImageMath ImageMath.cxx)
+  TARGET_LINK_LIBRARIES( ImageMath ${ITK_LIBRARIES} )
+
+  slicer3_set_plugins_output_path(ImageMath)
+  slicer3_install_plugins(ImageMath)

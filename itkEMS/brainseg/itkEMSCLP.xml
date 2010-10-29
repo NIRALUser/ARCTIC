@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>UNC</category>
+  <title>itkEMS</title>
+  <description>Atlas-based tissue segmentation method
+  </description>
+
+  <parameters>
+    <label>Input</label>
+    <description>Input parameters</description>
+    <file>
+      <name>EMSFile</name>
+      <label>XML segmentation file</label>
+      <channel>input</channel>
+      <longflag>XMLFile</longflag>
+      <description>Input volume to be filtered</description>
+    </file>
+  </parameters>
+  
+  <parameters advanced="true">
+	  <label>Input 2 : EMS file creator</label>
+	  <description>Input parameters</description>
+	  <image>
+		  <name>T1</name>
+		  <default></default>
+		  <label>T1 Weighted Image</label>
+		  <longflag>T1</longflag>
+		  <channel>input</channel>
+		  <description>T1 weighted image</description>
+	  </image>
+	  <image>
+		  <name>T2</name>
+		  <default></default>
+		  <label>T2 Weighted Image</label>
+		  <longflag>T2</longflag>
+		  <channel>input</channel>
+		  <description>T2 weighted image</description>
+	  </image>
+	  <image>
+		  <name>PD</name>
+		  <default></default>
+		  <label>PD Weighted Image</label>
+		  <longflag>pd</longflag>
+		  <channel>input</channel>
+		  <description>PD weighted image</description>
+	  </image>
+	  <string>
+		  <name>Orientation</name>
+		  <default>RAI</default>
+		  <label>Image Orientation</label>
+		  <longflag>orientation</longflag>
+		  <channel>input</channel>
+		  <description>Orientation of the selected images</description>
+	  </string>
+	  <directory>
+		  <name>SegAtlasDir</name>
+		  <default></default>
+		  <label>Tissue Segmentation Atlas Directory</label>
+		  <longflag>segAtlasDir</longflag>
+		  <channel>input</channel>
+		  <description>Tissue segmentation atlas directory</description>
+	  </directory>
+	  <string-enumeration>
+		  <name>AtlasType</name>
+		  <label>Segmentation Atlas Type</label>
+		  <longflag>atlasType</longflag>
+		  <description>Segmentation atlas type</description>
+		  <element>T1</element>
+		  <element>T2</element>
+		  <default>T1</default>
+	</string-enumeration>
+	<directory>
+		<name>OutputDir</name>
+		<default></default>
+		<label>Output Directory</label>
+		<longflag>outputDir</longflag>
+		<channel>output</channel>
+		<description>Ouput directory</description>
+	  </directory>
+
+  </parameters>
+  
+  <parameters advanced="true">
+	  <label>Advanced EMS file parameters</label>
+	  <description>Advanced parameters for the creation of the segmentation file</description>
+	  <string-enumeration>
+		  <name>OutputFormat</name>
+		  <label>Output Image Format</label>
+		  <longflag>outputFormat</longflag>
+		  <description>Output format</description>
+		  <element>GIPL</element>
+		  <element>Meta</element>
+		  <element>Analyse</element>
+		  <element>Nrrd</element>		  
+		  <element>NIFTI</element>		  
+		  <default>GIPL</default>
+	</string-enumeration>
+	  <integer>
+		  <name>FilterIteration</name>
+		  <description>Filter iterations</description>
+		  <label>Filter Iterations</label>
+		  <longflag>filterIteration</longflag>
+		  <default>10</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>50</maximum>
+			  <step>1</step>
+		  </constraints>
+	  </integer>
+	  
+	  <float>
+		  <name>FilterTimeStep</name>
+		  <description>Filter time step</description>
+		  <label>Filter Time Step</label>
+		  <longflag>filterTimeStep</longflag>
+		  <default>0.01</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>0.5</maximum>
+			  <step>0.01</step>
+		  </constraints>
+	  </float>
+	  <string-enumeration>
+		  <name>FilterMethod</name>
+		  <label>Filter Method</label>
+		  <longflag>filterMethod</longflag>
+		  <description>Filter method</description>
+		  <element>Curvature flow</element>
+		  <element>Grad aniso diffusion</element>
+		  <default>Curvature flow</default>
+	  </string-enumeration>
+
+	  <float>
+		  <name>WMPrior</name>
+		  <description>White matter global spacial prior scalling</description>
+		  <label>WM global spacial prior scalling</label>
+		  <longflag>WMPrior</longflag>
+		  <default>1.3</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>2</maximum>
+			  <step>0.1</step>
+		  </constraints>
+	  </float>
+	  <float>
+		  <name>GMPrior</name>
+		  <description>Grey matter global spacial prior scalling</description>
+		  <label>GM global spacial prior scalling</label>
+		  <longflag>GMPrior</longflag>
+		  <default>1</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>2</maximum>
+			  <step>0.1</step>
+		  </constraints>
+	  </float>
+	  <float>
+		  <name>CSFPrior</name>
+		  <description>Cerebrospinal fluid global spacial prior scalling</description>
+		  <label>CSF global spacial prior scalling</label>
+		  <longflag>CSFPrior</longflag>
+		  <default>0.7</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>2</maximum>
+			  <step>0.1</step>
+		  </constraints>
+	  </float>
+	  <float>
+		  <name>OtherPrior</name>
+		  <description>Other global spacial prior scalling</description>
+		  <label>Other global spacial prior scalling</label>
+		  <longflag>OtherPrior</longflag>
+		  <default>1</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>2</maximum>
+			  <step>0.1</step>
+		  </constraints>
+	  </float>
+	  <integer>
+		  <name>MaxBiasDegree</name>
+		  <description>Maximum bias degree</description>
+		  <label>Maximum Bias Degree</label>
+		  <longflag>maxBiasDegree</longflag>
+		  <default>4</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>20</maximum>
+			  <step>1</step>
+		  </constraints>
+	  </integer>
+	  <boolean>
+		  <name>AtlasWarping</name>
+		  <default>false</default>
+		  <label>No atlas warping</label>
+		  <longflag>AtlasWarpingOff</longflag>
+		  <description>Deformable registration of atlas to subject</description>
+	  </boolean>
+	  <integer>
+		  <name>GridSizeX</name>
+		  <description>X-direction grid size for atlas warping</description>
+		  <label>Grid Size (X)</label>
+		  <longflag>gridSizeX</longflag>
+		  <default>5</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>20</maximum>
+			  <step>1</step>
+		  </constraints>
+	  </integer>
+	  <integer>
+		  <name>GridSizeY</name>
+		  <description>Y-direction grid size for atlas warping</description>
+		  <label>Grid Size (Y)</label>
+		  <longflag>gridSizeY</longflag>
+		  <default>5</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>20</maximum>
+			  <step>1</step>
+		  </constraints>
+	  </integer>
+	  <integer>
+		  <name>GridSizeZ</name>
+		  <description>Z-direction grid size for atlas warping</description>
+		  <label>Grid Size (Z)</label>
+		  <longflag>gridSizeZ</longflag>
+		  <default>5</default>
+		  <constraints>
+			  <minimum>0</minimum>
+			  <maximum>20</maximum>
+			  <step>1</step>
+		  </constraints>
+	  </integer>
+</parameters>
+
+  <parameters advanced="true" >
+    <label>Options</label>
+    <description>Options</description>
+    <boolean>
+      <name>debugflag</name>
+      <label>Debug option</label>
+      <description>display debug messages</description>
+      <longflag>--debug</longflag>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>writeflag</name>
+      <label>Write less</label>
+      <description>Does not write posteriors and filtered, bias corrected images</description>
+      <longflag>--writeless</longflag>
+      <default>false</default>
+    </boolean>
+  </parameters>
+
+  <parameters advanced="true" >
+  <label>Atlas Images</label>
+    <string-vector>
+      <name>priorsList</name>
+      <longflag>priorsList</longflag>
+      <description> The list of full paths to the priors to be used.  The last prior MUST be the background.  Number of input should same to the number of priorsList</description>
+      <default></default>
+    </string-vector>
+    <double-vector>
+      <name>priorsWeightList</name>
+      <longflag deprecatedalias="priorWeightsList">priorsWeightList</longflag>
+      <description> Weightings forth each ofthe priors. Number of input should same to the number of priorsList</description>
+      <default></default>
+    </double-vector>
+    <image>
+      <name>templateVolume</name>
+      <longflag>templateVolume</longflag>
+      <description>The anatomical template volume that corresponds in physical space to the priors.  It is used for registering the priors to this data set.</description>
+      <label>Template Volume</label>
+      <default></default>
+      <channel>input</channel>
+    </image>
+  </parameters>
+</executable>

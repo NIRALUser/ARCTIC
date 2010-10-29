@@ -1,0 +1,4 @@
+PROJECT(itkEMS)
+
+SUBDIRS(brainseg)
+

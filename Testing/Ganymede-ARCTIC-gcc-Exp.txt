@@ -1,0 +1,27 @@
+SET (CTEST_SOURCE_DIRECTORY "/opt/DartClient/Release/ARCTIC")
+SET (CTEST_BINARY_DIRECTORY "/opt/DartClient/Release/ARCTIC_linux")
+
+# which ctest command to use for running the dashboard
+SET (CTEST_COMMAND  
+"/devel/linux/Slicer3_linux/Slicer3-lib/CMake-build/bin/ctest -D Experimental -A ${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}"
+)
+
+# what cmake command to use for configuring this dashboard
+SET (CTEST_CMAKE_COMMAND "/devel/linux/Slicer3_linux/Slicer3-lib/CMake-build/bin/cmake")
+
+# Should always rebuild everything from scratch
+SET (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
+
+# set any extra environment variables here
+SET (CTEST_ENVIRONMENT
+)
+
+SET (CTEST_INITIAL_CACHE
+"
+CMAKE_GENERATOR:INTERNAL=Unix Makefiles
+BUILDNAME:STRING=Linux-g++-4.1.2
+SITE:STRING=CentOS-32
+BUILD_TESTING:BOOL=ON
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++
+Slicer3_DIR:PATH=/opt/local/Slicer3_linux/Slicer3-build
+")
