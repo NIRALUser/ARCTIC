@@ -164,33 +164,38 @@ void toolsdistance::calculdistance(ImageType::Pointer GrayMatterBoundaryImage,
 				   ImageType::Pointer GrayMatterImage,ImageType::Pointer DistanceMapImage  )
 {
 	std::cout<<" Calcul Distance"<<std::endl;
-  //Declaration Iterator
+	//Declaration Iterator
 	IteratorType WhiteMatterBoundaryIt(WhiteMatterBoundaryImage ,WhiteMatterBoundaryImage->GetRequestedRegion() );
-  //Declaration of temporay variable	
+	//Declaration of temporay variable	
 	const ImageType::SpacingType& sp = WhiteMatterBoundaryImage->GetSpacing();
 
-  //calculate HashMap white and Gray
+	//calculate HashMap white and Gray
 	std::cout<<" Hash Map "<<std::endl;
 	p_HashMap.Hash_mapWG( WhiteMatterImage, WhiteMatterBoundaryImage,  GrayMatterImage,  DistanceMapImage );
   
-  //Delete Gray Matter point to obtain the squeletor of grayMatterImage
+	//Delete Gray Matter point to obtain the squeletor of grayMatterImage
 	deletepoint( GrayMatterImage, GrayMatterBoundaryImage, DistanceMapImage);
      
-  //fill of whiteMatterDistanceMap and GrayMatterDistanceMap
-  //curse of white matter boundary
+	//fill of whiteMatterDistanceMap and GrayMatterDistanceMap
+	//curse of white matter boundary
 	for(WhiteMatterBoundaryIt.GoToBegin() ; !WhiteMatterBoundaryIt.IsAtEnd(); ++WhiteMatterBoundaryIt )
-	{
+	{	
 		if(WhiteMatterBoundaryIt.Get()>0)//if its a whiteMatterBoundary point
 		{	//declaration and initialization of temporary variable
 			float distancetemp=0;
 			float distance=0;
 			ImageType::IndexType indexW, indextemp;
+			for(int i = 0 ; i < 3 ; i++)
+			{
+			  indexW[i] = 0;
+			  indextemp[i] = 0;			  
+			}
 			indexW =WhiteMatterBoundaryIt.GetIndex();
 			HashMapDistance::VectorstructType VectorG;                
-      //VectorG=p_HashMap.Get_HashMAp_W(indexW);
+			//VectorG=p_HashMap.Get_HashMAp_W(indexW);
 			VectorG=p_HashMap.m_WMHash_map[indexW];
 			int size = VectorG.size();
-    
+
 			if(size==0) //if it is whiteBoundarypoint whithout a gray pointer point
 			{
 				outputImageWM->SetPixel(indexW, 0); //fill 0 for this point
@@ -215,7 +220,7 @@ void toolsdistance::calculdistance(ImageType::Pointer GrayMatterBoundaryImage,
 						}        
 					}                                                                               
 				}
-        //fill the finalImage whith distances found
+				//fill the finalImage whith distances found				
 				outputImageWM->SetPixel(indexW, distance);
 				outputImageGM-> SetPixel(indextemp, distance);                     
 			}
@@ -276,11 +281,11 @@ void toolsdistance::AverageNeighborhood(ImageType::Pointer outputImageWM, ImageT
 							}
 						}      
 					}
-              //std::cout<<"box"<<box<<std::endl;  
+					//std::cout<<"box"<<box<<std::endl;  
 					float nb_box_distance = 0;
 					float sum = 0;
 					float average = 0;
-            //Calculate the average of each distances found for each whiteMatterboundary point without 0 for ditance
+					//Calculate the average of each distances found for each whiteMatterboundary point without 0 for ditance
 					for(int i = 0 ; i < box; i++)
 					{
 						if((A_distance->Get(i)>(sp[0])) || (A_distance->Get(i) > (sp[1])) || (A_distance->Get(i)> (sp[2])))
@@ -406,6 +411,12 @@ void toolsdistance::ComputeNeigborhoodDistance(ImageType::Pointer GrayImage, Ima
   //declaration of temporary variable
 	IteratorType BoundaryWhiteIt( BoundaryWhite, BoundaryWhite->GetRequestedRegion() );
 	ImageType::IndexType IndexG, IndexGtemp;
+	for(int i = 0 ; i < 3 ; i++)
+	{
+	  IndexG[i] = 0;
+	  IndexGtemp[i] = 0;
+	}
+	
   //create new images for save the noighborhood distances
 	m_NeighDistanceW = CreateNewImageLike(BoundaryWhite);
 	m_NeighDistanceG = CreateNewImageLike(GrayImage);
@@ -515,14 +526,22 @@ void toolsdistance::WriteWhiteFile(ImageType::Pointer WhiteDistMap,ImageType::Po
 					std::cerr << "Can't read the file" << std::endl;
 				}
 				ParImage = ParReader->GetOutput();
-
+				
+                                // DONT UNDERSTANT WHY WE NEED TO SAVE THE
+				//PARCELLATION MAP AGAIN - COMMENTED OUT
+/*
 				//set the name of the updated parcellation file
 				std::string par_outfilename(FileNameWhite);
 		
-				size_t found;
+				size_t found = 0;
 				found=par_outfilename.find_last_of( sep );
-				par_outfilename =  par_outfilename.substr(0,found) + sep + "parcellationOnWhite.nrrd";
-				std::cout<<" outfilename "<<par_outfilename<<std::endl;
+
+				//If no / was found then we just
+				//create the file in the current dir			      
+				if(found < 100000)		
+				  par_outfilename =  par_outfilename.substr(0,found) + sep + "parcellationOnWhite.nrrd";
+
+				std::cout<<" outfilename 1"<<par_outfilename<<std::endl;
 
 				//write new parcellation 
 				WriterType::Pointer par_writer = WriterType::New();
@@ -531,7 +550,7 @@ void toolsdistance::WriteWhiteFile(ImageType::Pointer WhiteDistMap,ImageType::Po
 				par_writer->SetFileName( par_outfilename );
 				par_writer->UseCompressionOn();
 				par_writer->Update();
-
+*/
 			}
 			if(Mode==2)//Mode with interpollation
 			{	
@@ -628,7 +647,6 @@ void toolsdistance::WriteWhiteFile(ImageType::Pointer WhiteDistMap,ImageType::Po
 				size_t found;
 				found=par_outfilename.find_last_of( sep );
 				par_outfilename =  par_outfilename.substr(0,found) + sep + "parcellationOnWhiteInterp.nrrd";
-				std::cout<<" outfilename "<<par_outfilename<<std::endl;
 		
 				//write new parcellation 
 				WriterType::Pointer par_writer = WriterType::New();
@@ -688,7 +706,6 @@ void toolsdistance::WriteWhiteFile(ImageType::Pointer WhiteDistMap,ImageType::Po
 			{
 				outfilename.insert(outfilename.size(),"_par_interp.csv");
 			}
-			std::cout<<" outfilename "<<outfilename<<std::endl;
 			outfile.open ( outfilename.c_str() ) ; 
 			//   outfile<<"Label "<<","<<"Distance"<<std::endl;
 			//NEW SYL
@@ -704,7 +721,6 @@ void toolsdistance::WriteWhiteFile(ImageType::Pointer WhiteDistMap,ImageType::Po
 			{
 				outfilename2.insert(outfilename2.size(),"_par_array_interp.csv");
 			}
-			std::cout<<" outfilename "<<outfilename2<<std::endl;
 			outfile2.open (outfilename2.c_str());
 			outfile2<<" nbre of cortical thickness voxel cortex inside folds "<<","<<m_CompIns<<std::endl;
 			outfile2<<" nbre of cortical thickness voxel cortex at the boundary "<<","<<m_CompBound<<std::endl;
@@ -944,8 +960,8 @@ void toolsdistance::SepareInsideVSBoundary(ImageType::Pointer GreyBoundaryImage,
 	Path1 = Name.substr(0,SepPosition+1);
 	std::string Name1 = "InsideCorticalThickness.mha";
 	std::string Name2 = "BoundaryCorticalThickness.mha";
-	std::string Final1 = Path1  + Name1;
-	std::string Final2 = Path1  + Name2;
+	std::string Final1 = Path1 + Name1;
+	std::string Final2 = Path1 + Name2;
 	std::strcpy(m_insideFileName,Final1.c_str());
 	std::strcpy(m_BoundaryFileName,Final2.c_str());
 

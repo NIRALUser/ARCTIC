@@ -162,6 +162,7 @@ void ImageSyl::SegImageWhiteAndGrey(const char *SegFileName, double labelWhite, 
   m_ImageSeg = m_reader->GetOutput();
   m_WhiteMatterImage = CreateNewImageLike(m_ImageSeg);
   m_GreyMatterImage =  CreateNewImageLike(m_ImageSeg);
+
   IteratorType ImageSegIt( m_ImageSeg, m_ImageSeg->GetRequestedRegion() );
   for ( ImageSegIt.GoToBegin(); !ImageSegIt.IsAtEnd(); ++ImageSegIt)
   {
@@ -315,6 +316,17 @@ ImagePointer ImageSyl::CreateNewImageLike(ImagePointer m_OriginalImage)
   outputImage->SetRegions( m_OriginalImage->GetRequestedRegion() );
   outputImage->CopyInformation( m_OriginalImage );
   outputImage->Allocate();
+
+  //Need to set all the image values to 0 because for some reason, the
+  //produced images are sometime with really high values
+  IteratorType ImIt(outputImage ,outputImage->GetRequestedRegion() );
+  PixelType init_val = 0;
+  for(ImIt.GoToBegin() ; !ImIt.IsAtEnd() ; ++ImIt)
+  {
+    ImIt.Set(init_val);
+  }
+
+
   return outputImage;
 }
 
@@ -329,7 +341,7 @@ void ImageSyl::ComputeDistance(char* WhiteMapFileName,  char* vtkFileName, char*
   //First, allocate the output image memory space
   m_WhiteMatterDistanceMap = CreateNewImageLike(m_WhiteMatterImage);
   m_GreyMatterDistanceMap = CreateNewImageLike(m_WhiteMatterImage);
-  
+
   p_distance->calculdistance(	m_GreyMatterBoundaryImage,
 				m_WhiteMatterDistanceMap,
 				m_GreyMatterDistanceMap,
@@ -348,7 +360,7 @@ void ImageSyl::ComputeDistance(char* WhiteMapFileName,  char* vtkFileName, char*
       p_distance->WriteWhiteFile(p_distance->m_InsideFoldsThicknessIm,m_WhiteMatterBoundaryImage ,ParFileName,p_distance->m_insideFileName, ParLoad, Interp , Threshold);
       p_distance->WriteWhiteFile(p_distance->m_BoundaryThicknessIm,m_WhiteMatterBoundaryImage ,ParFileName,p_distance->m_BoundaryFileName, ParLoad, Interp , Threshold);
     }
-  
+
   if(WriteDistance)
     {
       std::cout<<" Write distance map white without averaging "<<std::endl;
@@ -364,7 +376,6 @@ void ImageSyl::ComputeDistance(char* WhiteMapFileName,  char* vtkFileName, char*
       WriterPointer writerGM = WriterType::New();
       writerGM->SetFileName(DistanceMapOnGrey);
       writerGM->UseCompressionOn();
-      std::cout << "Grey matter values File Name: " <<DistanceMapOnGrey  << std::endl;
       writerGM->SetInput(m_GreyMatterDistanceMap);
       writerGM->Update();      
     }
