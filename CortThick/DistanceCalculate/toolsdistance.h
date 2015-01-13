@@ -11,7 +11,8 @@
 
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkImage.h"
-#include "itk_hash_map.h"
+//#include "itk_hash_map.h"
+#include <itksys/hash_map.hxx>
 #include "itkImageFileWriter.h"
 #include "itkImageFileReader.h"
 #include "itkConnectedComponentImageFilter.h"

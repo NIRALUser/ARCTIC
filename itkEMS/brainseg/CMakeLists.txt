@@ -58,9 +58,10 @@ TARGET_LINK_LIBRARIES(ITKEMSCOMMONLIB ${ITK_LIBRARIES} )
 ADD_EXECUTABLE(itkEMSCLP itkEMSCLP.cxx itkEMSCLPCLP.h)
 TARGET_LINK_LIBRARIES(itkEMSCLP ITKEMSCOMMONLIB ${ITK_LIBRARIES} )
 
-slicer3_set_plugins_output_path(ITKEMSCOMMONLIB)
-slicer3_install_plugins(ITKEMSCOMMONLIB)
-slicer3_set_plugins_output_path(itkEMSCLP)
-slicer3_install_plugins(itkEMSCLP)
-
+IF (Slicer3_FOUND)
+  slicer3_set_plugins_output_path(ITKEMSCOMMONLIB)
+  slicer3_install_plugins(ITKEMSCOMMONLIB)
+  slicer3_set_plugins_output_path(itkEMSCLP)
+  slicer3_install_plugins(itkEMSCLP)
+ENDIF (Slicer3_FOUND)
 

@@ -3,8 +3,8 @@
 
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkImage.h"
-#include "itk_hash_map.h"
-
+//#include "itk_hash_map.h"
+#include <itksys/hash_map.hxx>
 #include "Neighborhood.h"
 
 /*! \brief Brief Description: this class compute the HashMap from the distanceMap.
@@ -39,7 +39,7 @@ public:
     }
   }structhashfunction; 
 
-  typedef itk::hash_map< const ImageType::IndexType,VectorstructType,structhashfunction > HashMapstructType;
+  typedef itksys::hash_map< const ImageType::IndexType,VectorstructType,structhashfunction > HashMapstructType;
   
 public:
   HashMapDistance(void){}
