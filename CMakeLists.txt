@@ -49,11 +49,6 @@ ENDIF(Slicer3_FOUND)
 FIND_PACKAGE(BatchMake REQUIRED)
 INCLUDE(${BatchMake_USE_FILE})
 
-IF(Slicer3_FOUND)
-  slicer3_set_plugins_output_path(ARCTIC)
-  slicer3_install_plugins(ARCTIC)
-ENDIF()
-
 OPTION(COMPILE_ImageStat "Compile ImageStat." ON)
 IF( COMPILE_ImageStat )
   SUBDIRS(ImageStat)
@@ -83,5 +78,9 @@ IF( COMPILE_ARCTIC )
 
   ADD_TEST(ARCTICTest1 ${LIBRARY_OUTPUT_PATH}/Slicer3/Plugins/ARCTIC --help)
   ADD_TEST(ARCTICTest2 ${LIBRARY_OUTPUT_PATH}/Slicer3/Plugins/ARCTIC --version)
+  IF(Slicer3_FOUND)
+    slicer3_set_plugins_output_path(ARCTIC)
+    slicer3_install_plugins(ARCTIC)
+  ENDIF()
 ENDIF()
 
