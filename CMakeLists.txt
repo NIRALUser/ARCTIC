@@ -20,11 +20,21 @@ IF(BUILD_TESTING)
   INCLUDE(CTest)
 ENDIF(BUILD_TESTING)
 
+FIND_PACKAGE(BatchMake REQUIRED)
+INCLUDE(${BatchMake_USE_FILE})
+
 FIND_PACKAGE(Slicer3 QUIET NO_DEFAULT_PATH)
 IF(Slicer3_FOUND)
   INCLUDE(${Slicer3_USE_FILE})
   slicer3_set_default_install_prefix_for_external_projects()
 ELSE(Slicer3_FOUND)
+
+  FIND_PACKAGE(SlicerExecutionModel REQUIRED)
+  IF (SlicerExecutionModel_FOUND)
+    INCLUDE(${SlicerExecutionModel_USE_FILE})
+    INCLUDE(${GenerateCLP_USE_FILE})
+  ENDIF(SlicerExecutionModel_FOUND)
+
   FIND_PACKAGE(ITK REQUIRED)
   IF (ITK_FOUND)
     INCLUDE(${ITK_USE_FILE})
@@ -39,15 +49,7 @@ ELSE(Slicer3_FOUND)
     MESSAGE(FATAL_ERROR Please set VTK_DIR.)
   ENDIF (VTK_FOUND)
 
-  FIND_PACKAGE(SlicerExecutionModel REQUIRED)
-  IF (SlicerExecutionModel_FOUND)
-    INCLUDE(${SlicerExecutionModel_USE_FILE})
-    INCLUDE(${GenerateCLP_USE_FILE})
-  ENDIF(SlicerExecutionModel_FOUND)
 ENDIF(Slicer3_FOUND)
-
-FIND_PACKAGE(BatchMake REQUIRED)
-INCLUDE(${BatchMake_USE_FILE})
 
 OPTION(COMPILE_ImageStat "Compile ImageStat." ON)
 IF( COMPILE_ImageStat )
